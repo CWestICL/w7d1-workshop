@@ -11,26 +11,35 @@ app.get("/", (req,res)=> {
     res.sendStatus(200);
 });
 
-app.get("/camembert", async (req,res)=> {
-    //res.send("Gathering Camembert data");
-    const cheese = await Cheese.findOne({where: {title: "Camembert"}});
+app.get("/cheeses/:cheese", async (req,res)=> {
+    let cheeseTitle = req.params.cheese.charAt(0).toUpperCase() + req.params.cheese.slice(1);
+    const cheese = await Cheese.findOne({where: {title: cheeseTitle}});
+    if (!cheese) {
+        res.send(404);
+    }
+    let length = Number(req.query.n);
     let {title, description} = cheese;
     let payload = {
         title: title,
-        description: description
+        description: description.slice(0,length)
     }
     res.send(payload);
 });
 
-app.get("/c-cheese", async (req,res)=> {
-    //res.send("Gathering Camembert data");
+app.get("/cheeses", async (req,res)=> {
+    let letter = req.query.char;
     const cheeses = await Cheese.findAll();
-    let cCheeses = cheeses.filter((cheese) => {
-        if (cheese.title[0] === "C") {
+    let filterCheeses = cheeses.filter((cheese) => {
+        if (cheese.title[0] === letter.toUpperCase()) {
             return true;
         }
     })
-    res.send(cCheeses);
+    if (filterCheeses.length > 0) {
+        res.send(filterCheeses);
+    }
+    else {
+        res.send(404);
+    }
 });
 
 app.listen(port, () => {
