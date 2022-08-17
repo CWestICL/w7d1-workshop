@@ -12,6 +12,5 @@ let populateDataBase = async () => {
   let buildDB = async () => {
         await populateDataBase()
   }
-  buildDB()
 
   module.exports = {buildDB}

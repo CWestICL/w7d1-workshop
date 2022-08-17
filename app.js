@@ -5,7 +5,10 @@ const express = require("express");
 const app = express();
 const {Cheese,Board} = require("./models") 
 const path = require("path");
-const port = 3001;
+const port = 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 
 app.get("/", (req,res)=> {
     res.sendStatus(200);
@@ -42,8 +45,54 @@ app.get("/cheeses", async (req,res)=> {
     }
 });
 
+app.post("/cheeses/", async (req,res)=> {
+    let newCheese = req.body;
+    if (!newCheese.title || !newCheese.description) {
+        res.send(500);
+    }
+    else {
+        await Cheese.create({
+            title: newCheese.title,
+            description: newCheese.description
+        });
+        console.log("New cheese added:",newCheese.title);
+        res.send(200);
+    }
+});
+
+app.put("/cheeses/:id", async (req,res)=> {
+    const cheese = await Cheese.findByPk(req.params.id);
+    if (!cheese) {
+        res.send(404);
+    }
+    else {
+        let newCheese = req.body;
+        if (!newCheese.title || !newCheese.description) {
+            res.send(500);
+        }
+        else {
+            await cheese.update( {
+                title: newCheese.title,
+                description: newCheese.description
+            });
+            res.send(200);
+        }
+    }
+});
+
+app.delete("/cheeses/:id", async (req,res)=> {
+    const cheese = await Cheese.findByPk(req.params.id);
+    if (!cheese) {
+        res.send(404);
+    }
+    else {
+        cheese.destroy();
+        res.send(200);
+    }
+});
+
 app.listen(port, () => {
-    console.log("The server is live and listening at http://localhost:3001");
+    console.log("The server is live and listening at http://localhost:" + port);
 });
 
 
